@@ -70,7 +70,8 @@ button[data-action] {
 button:hover {
   filter: brightness(1.05);
 }
-button:active {
+button:active,
+button.keyboard-active {
   transform: scale(0.97);
 }
 
