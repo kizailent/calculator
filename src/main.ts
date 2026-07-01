@@ -1,5 +1,48 @@
 import './style.css'
 
+
+// outputに表示する機能追加
+const display = document.querySelector<HTMLDivElement>("#display");
+const MAX_INPUT_LENFTH = 15;
+const numberButtons = document.querySelectorAll<HTMLButtonElement>('button[data-number]');
+
+let currentInput = "0";
+
+function updateDisplay(): void {
+  if (!display) {
+    return;
+  }
+  display.textContent = currentInput;
+}
+
+function inputNumber(number: string): void {
+  if (currentInput.length >= MAX_INPUT_LENFTH) {
+    return;
+  }
+
+  if (currentInput === "0") {
+    currentInput = number;
+  } else {
+    currentInput += number;
+  }
+  updateDisplay();
+}
+
+numberButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const number = button.dataset.number;
+    if (number=== undefined) {
+      return;
+    }
+    inputNumber(number);
+  });
+});
+
+
+
+
+
+// キーボード操作対応
 const KeyToButtonSelector: Record<string, string> = {
   "0": 'button[data-number="0"]',
   "1": 'button[data-number="1"]',
@@ -50,6 +93,10 @@ document.addEventListener("keydown", (event) => {
 
   event.preventDefault();
   button.classList.add("keyboard-active");
+
+  if (/^[0-9]$/.test(event.key)) {
+    inputNumber(event.key);
+  }
 });
 
 document.addEventListener("keyup", (enent) => {
@@ -72,3 +119,5 @@ window.addEventListener("blur", () => {
     button.classList.remove("keyboard-active");
   });
 });
+
+
