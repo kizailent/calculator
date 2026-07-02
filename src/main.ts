@@ -6,7 +6,12 @@ const display = document.querySelector<HTMLDivElement>("#display");
 const MAX_INPUT_LENFTH = 15;
 const numberButtons = document.querySelectorAll<HTMLButtonElement>('button[data-number]');
 
+type Operator = "+" | "-" | "×" | "÷";
+
 let currentInput = "0";
+let previousInput: number | null = null;
+let selectedOperator: Operator | null = null;
+let waitingForNextInput = false;
 
 function updateDisplay(): void {
   if (!display) {
@@ -16,6 +21,13 @@ function updateDisplay(): void {
 }
 
 function inputNumber(number: string): void {
+  if (waitingForNextInput){
+    currentInput = number;
+    waitingForNextInput = false;
+    updateDisplay();
+    return;
+  }
+
   if (currentInput.length >= MAX_INPUT_LENFTH) {
     return;
   }
@@ -28,6 +40,41 @@ function inputNumber(number: string): void {
   updateDisplay();
 }
 
+function isOperator(value: string | undefined,):
+  value is Operator {
+    return (
+      value === "+" || value === "-" || value === "×" || value === "÷"
+    );
+}
+
+function selectOperator(nextOperator: Operator): void {
+  // 演算子が選択されている状態で、次の演算子が選択された場合は、演算子を更新するだけにする。
+  if (waitingForNextInput && selectedOperator!==null){
+    selectedOperator = nextOperator;
+    logState();
+    return;
+  };
+  // 連続計算を行う場合は、前回の入力値がnullでないことと、次の入力を待っていない状態であることを確認する。
+  if (previousInput !== null && !waitingForNextInput) {
+    console.info("連続計算はまだ実行しない。");
+    return;
+  }
+
+  previousInput = Number(currentInput);
+  selectedOperator = nextOperator;
+  waitingForNextInput = true;
+  logState();
+};
+
+function logState(): void {
+  console.log({
+    currentInput,
+    previousInput,
+    selectedOperator,
+    waitingForNextInput,
+  });
+}
+
 numberButtons.forEach((button) => {
   button.addEventListener("click", () => {
     const number = button.dataset.number;
@@ -37,6 +84,19 @@ numberButtons.forEach((button) => {
     inputNumber(number);
   });
 });
+
+const operatorButtons = document.querySelectorAll<HTMLButtonElement>('button[data-operator]');
+
+operatorButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const operatorValue = button.dataset.operator;
+    if (!isOperator(operatorValue)) {
+      return;
+    }
+    selectOperator(operatorValue);
+  });
+});
+
 
 
 
