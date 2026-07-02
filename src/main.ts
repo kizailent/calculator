@@ -3,7 +3,7 @@ import './style.css'
 
 // outputに表示する機能追加
 const display = document.querySelector<HTMLDivElement>("#display");
-const MAX_INPUT_LENFTH = 15;
+const MAX_INPUT_LENGTH = 15;
 const numberButtons = document.querySelectorAll<HTMLButtonElement>('button[data-number]');
 
 type Operator = "+" | "-" | "×" | "÷";
@@ -28,7 +28,7 @@ function inputNumber(number: string): void {
     return;
   }
 
-  if (currentInput.length >= MAX_INPUT_LENFTH) {
+  if (currentInput.length >= MAX_INPUT_LENGTH) {
     return;
   }
 
@@ -66,6 +66,26 @@ function selectOperator(nextOperator: Operator): void {
   logState();
 };
 
+function inputDecimal(): void {
+  if (waitingForNextInput) {
+    currentInput = "0.";
+    waitingForNextInput = false;
+    updateDisplay();
+    return;
+  }
+  
+  if (currentInput.includes(".")) {
+    return;
+  }
+
+  if (currentInput.length >= MAX_INPUT_LENGTH) {
+    return;
+  }
+
+  currentInput += ".";
+  updateDisplay();
+}
+
 function logState(): void {
   console.log({
     currentInput,
@@ -96,6 +116,13 @@ operatorButtons.forEach((button) => {
     selectOperator(operatorValue);
   });
 });
+
+const decimalButton = document.querySelector<HTMLButtonElement>('button[data-action="decimal"]');
+if (decimalButton) {
+  decimalButton.addEventListener("click", () => {
+    inputDecimal();
+  });
+}
 
 
 
@@ -156,6 +183,10 @@ document.addEventListener("keydown", (event) => {
 
   if (/^[0-9]$/.test(event.key)) {
     inputNumber(event.key);
+  }else if (event.key === ".") {
+    inputDecimal();
+  }else if (isOperator(event.key)) {
+    selectOperator(event.key);
   }
 });
 
