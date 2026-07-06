@@ -6,7 +6,7 @@ const display = document.querySelector<HTMLDivElement>("#display");
 const MAX_INPUT_LENGTH = 15;
 const numberButtons = document.querySelectorAll<HTMLButtonElement>('button[data-number]');
 
-type Operator = "+" | "-" | "×" | "÷";
+type Operator = "+" | "-" | "*" | "/";
 
 let currentInput = "0";
 let previousInput: number | null = null;
@@ -43,7 +43,7 @@ function inputNumber(number: string): void {
 function isOperator(value: string | undefined,):
   value is Operator {
     return (
-      value === "+" || value === "-" || value === "×" || value === "÷"
+      value === "+" || value === "-" || value === "*" || value === "/"
     );
 }
 
@@ -114,9 +114,9 @@ function calculate(
       return left + right;
     case "-":
       return left - right;
-    case "×":
+    case "*":
       return left * right;
-    case "÷":
+    case "/":
       return left / right;
     default:
       throw new Error(`Unsupported operator: ${operator}`);
@@ -204,8 +204,8 @@ const KeyToButtonSelector: Record<string, string> = {
 
   "+": 'button[data-operator="+"]',
   "-": 'button[data-operator="-"]',
-  "*": 'button[data-operator="×"]',
-  "/": 'button[data-operator="÷"]',
+  "*": 'button[data-operator="*"]',
+  "/": 'button[data-operator="/"]',
 
   ".": 'button[data-action="decimal"]',
   "%": 'button[data-action="percent"]',
