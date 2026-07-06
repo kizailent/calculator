@@ -48,6 +48,7 @@ function isOperator(value: string | undefined,):
 }
 
 function selectOperator(nextOperator: Operator): void {
+  const inputValue = Number(currentInput);
   // 演算子が選択されている状態で、次の演算子が選択された場合は、演算子を更新するだけにする。
   if (waitingForNextInput && selectedOperator!==null){
     selectedOperator = nextOperator;
@@ -55,12 +56,20 @@ function selectOperator(nextOperator: Operator): void {
     return;
   };
   // 連続計算を行う場合は、前回の入力値がnullでないことと、次の入力を待っていない状態であることを確認する。
-  if (previousInput !== null && !waitingForNextInput) {
-    console.info("連続計算はまだ実行しない。");
-    return;
+  if (previousInput === null) {
+    previousInput = inputValue;
+  } else if (selectedOperator !== null) {
+    const result = calculate(
+      previousInput,
+      inputValue,
+      selectedOperator,
+    );
+    const formattedResult = formatResult(result);
+    currentInput=formattedResult;
+    previousInput = Number(formattedResult);
+    updateDisplay();
   }
 
-  previousInput = Number(currentInput);
   selectedOperator = nextOperator;
   waitingForNextInput = true;
   logState();
@@ -95,6 +104,51 @@ function logState(): void {
   });
 }
 
+function calculate(
+  left: number,
+  right: number,
+  operator: Operator,
+): number {
+  switch (operator) {
+    case "+":
+      return left + right;
+    case "-":
+      return left - right;
+    case "×":
+      return left * right;
+    case "÷":
+      return left / right;
+    default:
+      throw new Error(`Unsupported operator: ${operator}`);
+  }
+}
+
+function formatResult(value: number):string {
+  return Number.parseFloat(value.toFixed(10)).toString();
+}
+
+function performCalculation(): void {
+  if (
+    previousInput === null ||
+    selectedOperator === null ||
+    waitingForNextInput
+  ) {
+    return;
+  }
+
+  const rightInput = Number(currentInput);
+
+  const reslut = calculate(previousInput, rightInput, selectedOperator);
+  currentInput = formatResult(reslut);
+  previousInput = null;
+  selectedOperator = null;
+  waitingForNextInput = true;
+  updateDisplay();
+}
+
+
+
+
 numberButtons.forEach((button) => {
   button.addEventListener("click", () => {
     const number = button.dataset.number;
@@ -123,6 +177,12 @@ if (decimalButton) {
     inputDecimal();
   });
 }
+
+const equalsButton = document.querySelector<HTMLButtonElement>('button[data-action="equals"]');
+equalsButton?.addEventListener("click", () => {
+  performCalculation();
+});
+
 
 
 
@@ -187,6 +247,8 @@ document.addEventListener("keydown", (event) => {
     inputDecimal();
   }else if (isOperator(event.key)) {
     selectOperator(event.key);
+  }else if (event.key === "=" || event.key === "Enter") {
+    performCalculation();
   }
 });
 
