@@ -12,6 +12,7 @@ let currentInput = "0";
 let previousInput: number | null = null;
 let selectedOperator: Operator | null = null;
 let waitingForNextInput = false;
+let hasError = false;
 
 function updateDisplay(): void {
   if (!display) {
@@ -21,6 +22,8 @@ function updateDisplay(): void {
 }
 
 function inputNumber(number: string): void {
+  if(hasError){resetCalculator()};
+
   if (waitingForNextInput){
     currentInput = number;
     waitingForNextInput = false;
@@ -50,6 +53,9 @@ function isOperator(value: string | undefined,):
 function selectOperator(nextOperator: Operator): void {
   const inputValue = Number(currentInput);
   // 演算子が選択されている状態で、次の演算子が選択された場合は、演算子を更新するだけにする。
+
+  if (hasError){return;};
+
   if (waitingForNextInput && selectedOperator!==null){
     selectedOperator = nextOperator;
     logState();
@@ -64,6 +70,12 @@ function selectOperator(nextOperator: Operator): void {
       inputValue,
       selectedOperator,
     );
+
+    if (result === null || !Number.isFinite(result)){
+      showError();
+      return;
+    }
+
     const formattedResult = formatResult(result);
     currentInput=formattedResult;
     previousInput = Number(formattedResult);
@@ -76,6 +88,8 @@ function selectOperator(nextOperator: Operator): void {
 };
 
 function inputDecimal(): void {
+  if (hasError){resetCalculator();}
+
   if (waitingForNextInput) {
     currentInput = "0.";
     waitingForNextInput = false;
@@ -108,7 +122,7 @@ function calculate(
   left: number,
   right: number,
   operator: Operator,
-): number {
+): number | null {
   switch (operator) {
     case "+":
       return left + right;
@@ -117,6 +131,7 @@ function calculate(
     case "*":
       return left * right;
     case "/":
+      if (right === 0){ return null;};
       return left / right;
     default:
       throw new Error(`Unsupported operator: ${operator}`);
@@ -138,11 +153,38 @@ function performCalculation(): void {
 
   const rightInput = Number(currentInput);
 
-  const reslut = calculate(previousInput, rightInput, selectedOperator);
-  currentInput = formatResult(reslut);
+  const result = calculate(previousInput, rightInput, selectedOperator);
+
+  if (result === null || !Number.isFinite(result)){
+    showError();
+    return;
+  }
+
+  currentInput = formatResult(result);
   previousInput = null;
   selectedOperator = null;
   waitingForNextInput = true;
+  hasError = false;
+
+  updateDisplay();
+}
+
+function showError(): void {
+  currentInput = "Error";
+  previousInput = null;
+  selectedOperator = null;
+  waitingForNextInput = true;
+  hasError = true;
+
+  updateDisplay();
+}
+
+function resetCalculator(): void {
+  currentInput = "0";
+  previousInput = null;
+  selectedOperator = null;
+  waitingForNextInput = false;
+  hasError = false;
   updateDisplay();
 }
 
@@ -183,6 +225,10 @@ equalsButton?.addEventListener("click", () => {
   performCalculation();
 });
 
+const clearButton = document.querySelector<HTMLButtonElement>(
+  'button[data-action="clear"]',
+)
+clearButton?.addEventListener("click",() => {resetCalculator();});
 
 
 
@@ -249,6 +295,8 @@ document.addEventListener("keydown", (event) => {
     selectOperator(event.key);
   }else if (event.key === "=" || event.key === "Enter") {
     performCalculation();
+  }else if (event.key==="Escape"|| event.key ==="Delete"){
+    resetCalculator();
   }
 });
 
