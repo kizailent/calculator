@@ -207,6 +207,35 @@ function deleteLastCharacter(): void{
   updateDisplay();
 }
 
+function inputPercent(): void {
+  if (hasError){return;};
+
+  if (waitingForNextInput){return;};
+
+  const inputValue = Number(currentInput);
+
+  let percentValue: number;
+
+  if (
+    previousInput !== null && selectedOperator !== null &&
+    (selectedOperator === "+" || selectedOperator === "-")
+  ){
+    percentValue = previousInput * inputValue /100;
+  }else {
+    percentValue = inputValue / 100;
+  }
+
+  if (!Number.isFinite(percentValue)){
+    showError();
+    return;
+  }
+
+  currentInput = formatResult(percentValue);
+  updateDisplay();
+
+
+}
+
 
 
 
@@ -251,6 +280,9 @@ clearButton?.addEventListener("click",() => {resetCalculator();});
 
 const deleteButton = document.querySelector<HTMLButtonElement>('button[data-action="delete"]');
 deleteButton?.addEventListener("click", deleteLastCharacter,);
+
+const percentButton = document.querySelector<HTMLButtonElement>('button[data-action="percent"]',);
+percentButton?.addEventListener("click", inputPercent,);
 
 
 
@@ -319,6 +351,10 @@ document.addEventListener("keydown", (event) => {
     performCalculation();
   }else if (event.key==="Escape"|| event.key ==="Delete"){
     resetCalculator();
+  }else  if (event.key==="Backspace"){
+    deleteLastCharacter();
+  }else if (event.key==="%"){
+    inputPercent();
   }
 });
 
