@@ -188,6 +188,25 @@ function resetCalculator(): void {
   updateDisplay();
 }
 
+function deleteLastCharacter(): void{
+  if (hasError){
+    resetCalculator();
+    return;
+  }
+  if (waitingForNextInput) {
+    return;
+  }
+  const nextInput = currentInput.slice(0,-1);
+  
+  if (nextInput === "" || nextInput==="-"){
+    currentInput = "0"
+  }else{
+    currentInput = nextInput;
+  }
+
+  updateDisplay();
+}
+
 
 
 
@@ -229,6 +248,9 @@ const clearButton = document.querySelector<HTMLButtonElement>(
   'button[data-action="clear"]',
 )
 clearButton?.addEventListener("click",() => {resetCalculator();});
+
+const deleteButton = document.querySelector<HTMLButtonElement>('button[data-action="delete"]');
+deleteButton?.addEventListener("click", deleteLastCharacter,);
 
 
 
