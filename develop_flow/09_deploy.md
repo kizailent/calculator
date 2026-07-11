@@ -113,12 +113,15 @@ touch vite.config.ts
 ```typescript
 import { defineConfig } from "vite";
 
-export default defineConfig(({ command }) => ({
-  base:
-    command === "build"
-      ? "/calculator/"
-      : "/",
-}));
+export default defineConfig(
+  ({ command, isPreview }) => ({
+    base:
+      command === "build" ||
+      isPreview === true
+        ? "/calculator/"
+        : "/",
+  }),
+);
 ```
 
 ---
