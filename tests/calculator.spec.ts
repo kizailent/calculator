@@ -3,15 +3,15 @@ import {test, expect, type Page,} from "@playwright/test";
 function display(page:Page){ return page.locator("#display")};
 
 function numberButton(page:Page, number:string,){
-  return page.locator('button[data-number="${number}"]',);
+  return page.locator(`button[data-number="${number}"]`,);
 }
 
 function operatorButton(page:Page,operator:string,){
-  return page.locator('button[data-operator="${operator}"]');
+  return page.locator(`button[data-operator="${operator}"]`);
 }
 
 function actionButton(page:Page,action:string,){
-  return page.locator('button[data-action"${actoin}"]',);
+  return page.locator(`button[data-action="${action}"]`,);
 }
 
 
